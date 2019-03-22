@@ -1,8 +1,12 @@
+import numpy as np
 from Data import LoadData
+
+def GenerateGraph(cross_info):
 
 
 def run(car_path,road_path,cross_path,answer_path):
     car_info,road_info,cross_info = LoadData(car_path,road_path,cross_path)
+
 
     
 if __name__ == "__main__":
