@@ -2,10 +2,14 @@ import numpy as np
 from Data import LoadData
 
 def GenerateGraph(cross_info):
+    graph = np.zeros([cross_info.shape[0],cross_info.shape[0]],dtype = float)
+    return graph
+
 
 
 def run(car_path,road_path,cross_path,answer_path):
     car_info,road_info,cross_info = LoadData(car_path,road_path,cross_path)
+    graph = GenerateGraph(road_info)
 
 
     
