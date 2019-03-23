@@ -13,4 +13,5 @@ def LoadData(car_path,road_path,cross_path):
     for i in range (cross_info.shape[0]):
         cross_info[i,0] = cross_info[i,0][1:]
         cross_info[i,4] = cross_info[i,4][:-1]
+        
     return car_info,road_info,cross_info

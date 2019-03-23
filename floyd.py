@@ -10,7 +10,7 @@ def Floyd(graph_init):
             if i == j:
                 continue
 
-            path[i].setdefault(j, [i,j])
+            path[i].setdefault(j, [i,j])  #初始化直接路径
             new_node = None
 
             for k in range(length):
@@ -22,6 +22,5 @@ def Floyd(graph_init):
                     graph[i][j] = new_len
                     new_node = k
             if new_node:
-                path[i][j].insert(-1, new_node)
-
+                path[i][k].insert(-1, new_node)
     return graph, path
