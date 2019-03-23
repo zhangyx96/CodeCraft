@@ -1,6 +1,6 @@
 import numpy as np
-def Floyd(graph_int):
-    graph = np.array(graph_int)
+def Floyd(graph_init):
+    graph = np.array(graph_init)
     length = len(graph)
     path = {}
 

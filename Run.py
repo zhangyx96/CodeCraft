@@ -1,26 +1,56 @@
 import numpy as np
 
 from Data import LoadData
-from Floyd import Floyd
+from floyd import Floyd
 
-def GenerateGraph(road_info,cross_info):  #初始化图
+def GenerateGraph(road_info,cross_info,max_speed):  #初始化图
     road_nums =  road_info.shape[0]
     cross_nums = cross_info.shape[0]
     MAXWEIGHT = 99999  #用来表示不存在路径
+    road_table = np.zeros([cross_nums,cross_nums],dtype = int) + MAXWEIGHT
     graph = np.zeros([cross_nums,cross_nums],dtype = float) + MAXWEIGHT #初始化图
     for i in range(road_nums):
         start_id = int(road_info[i,4])-1  #cross编号从1开始
         end_id = int(road_info[i,5])-1
-        graph[start_id,end_id] = float(road_info[i,1])/float(road_info[i,2]) #路径长度/最高限速
+        speed_limit = min(max_speed,float(road_info[i,2]))
+        graph[start_id,end_id] = float(road_info[i,1])/speed_limit#路径长度/最高限速
+        road_table[start_id,end_id] = int (road_info[i,0]) 
+        if int(road_info[i,6]):
+            graph[end_id,start_id] = float(road_info[i,1])/speed_limit ##单双向判断
+            road_table[end_id,start_id] = int (road_info[i,0]) 
     for j in range(cross_nums): #对角线置为0
         graph[j,j] = 0
-    return graph
+    return graph,road_table
 
 def run(car_path,road_path,cross_path,answer_path):
     car_info,road_info,cross_info = LoadData(car_path,road_path,cross_path)
-    graph_init = GenerateGraph(road_info,cross_info)
-    graph, path =  Floyd(graph_init)
-    a = 0
+    for i in range (car_info.shape[0]):
+        car_info[i,0] = car_info[i,0][1:]
+        car_info[i,4] = car_info[i,4][:-1]
+    for i in range (road_info.shape[0]):
+        road_info[i,0] = road_info[i,0][1:]
+        road_info[i,6] = road_info[i,6][:-1]
+    for i in range (cross_info.shape[0]):
+        cross_info[i,0] = cross_info[i,0][1:]
+        cross_info[i,4] = cross_info[i,4][:-1]
+
+    for i in range(car_info.shape[0]):
+        car_id = int(car_info[i,0])
+        start = int(car_info[i,1])-1
+        end = int(car_info[i,2])-1
+        max_speed = float(car_info[i,3])
+        start_time = float(car_info[i,4])
+
+        graph_init,road_table = GenerateGraph(road_info,cross_info,max_speed)
+        graph, path =  Floyd(graph_init)
+        car_path = path[start][end]
+        road = []
+        for j in range(len(car_path)-1):
+            road.append(road_table[car_path[j],car_path[j+1]])
+        print(road)
+    
+        
+    
 
 
     
