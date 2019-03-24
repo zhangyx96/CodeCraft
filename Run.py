@@ -37,9 +37,8 @@ def run(car_path,road_path,cross_path,answer_path):
         road = []
         for j in range(len(car_path)-1):
             road.append(road_table[car_path[j],car_path[j+1]])
-        print(path)    
-        print(car_path)
-        print(road)
+        print('car {} path:{}'.format(car_id,car_path))
+
     
         
     
