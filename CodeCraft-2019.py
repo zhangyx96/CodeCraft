@@ -2,7 +2,7 @@ import logging
 import sys
 
 import numpy as np
-from Run import run
+from run import run
 
 logging.basicConfig(level=logging.DEBUG,
                     filename='../logs/CodeCraft-2019.log',
