@@ -43,7 +43,8 @@ def WriteFile(answer_path,ans,first_flag):
 def run(car_path,road_path,cross_path,answer_path):
     car_info,road_info,cross_info = LoadData(car_path,road_path,cross_path)
     ans = []
-    for i in range(car_info.shape[0]):
+    car_nums = car_info.shape[0]
+    for i in range(car_nums):
         car_id = int(car_info[i,0])
         start = int(car_info[i,1])-1
         end = int(car_info[i,2])-1
@@ -54,6 +55,7 @@ def run(car_path,road_path,cross_path,answer_path):
         car_path = path[start][end]
         #print('car {} path:{}'.format(car_id,car_path))
         ans.append(GetAnswer(car_id,start_time,car_path,road_table))
+        print('[{}/{}]'.format(i+1,car_nums))
     np.savetxt(answer_path,ans,fmt='%s')
 
 
