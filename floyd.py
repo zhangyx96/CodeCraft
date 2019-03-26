@@ -10,13 +10,12 @@ def Floyd(graph_init):
             for j in range(length):
                 if i == j:
                     continue
-    
                 path[i].setdefault(j, [i,j])  #初始化直接路径
                 new_node = None
-    
+
                 if k == j or k == i:
                     continue
-
+                    
                 new_len = graph[i][k] + graph[k][j]
                 if graph[i][j] > new_len:
                     graph[i][j] = new_len

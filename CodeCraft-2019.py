@@ -2,7 +2,7 @@ import logging
 import sys
 
 import numpy as np
-from Run import run
+from run import *
 
 logging.basicConfig(level=logging.DEBUG,
                     filename='../logs/CodeCraft-2019.log',
@@ -29,7 +29,7 @@ def main():
 # to read input file
 # process
 # to write output file
-    run(car_path,road_path,cross_path,answer_path)
+    run_0(car_path,road_path,cross_path,answer_path)
 
 
 if __name__ == "__main__":
