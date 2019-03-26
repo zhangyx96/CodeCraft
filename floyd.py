@@ -20,7 +20,7 @@ def Floyd(graph_init):
                 if graph[i][j] > new_len:
                     graph[i][j] = new_len
                     new_node = k
-                if new_node:
+                if not new_node is None: # 不要用if new_node：None和0无法区分 
                     if graph[i][new_node]<graph_ini[i][new_node]: #i和newnode之间距离比初始值短
                         path[i][j]= path[i][new_node][:] #不要浅复制
                         if graph[new_node][j]<graph_ini[new_node][j]: #j和newnode之间距离比初始值短
