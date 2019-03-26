@@ -1,5 +1,7 @@
 import numpy as np
+from math import ceil
 import matplotlib.pyplot as plt
+
 from data import LoadData
 from floyd import Floyd
 
@@ -63,8 +65,9 @@ def run_0(car_path,road_path,cross_path,answer_path):
     ans = []
     car_nums = car_info.shape[0]
     cars_speed = np.array(car_info[:,3],dtype = int)
-    speeds = [2,4,6,8]
-    time = np.array([110,105,100,95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10,4])*3
+    speeds = [8,6,4,2]
+    N =500
+    time = np.linspace(10,700,N,dtype=int)
     car_info_group =[]
     for s in speeds:
         car_info_group.append(car_info[cars_speed == s])
@@ -79,7 +82,9 @@ def run_0(car_path,road_path,cross_path,answer_path):
             end = int(car_info_group[i][j,2])-1
             start_time = int(car_info_group[i][j,4])
             car_path = path[start][end]
-            time_id = round(count/car_nums*20)
+            if car_path == -1:
+                a = 0
+            time_id = ceil(count/car_nums*N)-1
             ans.append(GetAnswer(car_id,time[time_id],car_path,road_table))
     np.savetxt(answer_path,ans,fmt='%s')
 
