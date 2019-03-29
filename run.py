@@ -8,7 +8,7 @@ from floyd import Floyd
 def GenerateGraph(road_info,cross_info,max_speed,road_weight):  #初始化图
     road_nums =  road_info.shape[0]
     cross_nums = cross_info.shape[0]
-    ratio = 2.4 #道路满占用加权系数
+    ratio = 5 #道路满占用加权系数
     MAXWEIGHT = 99999  #用来表示不存在路径
     ROADINVALID = -1 #表示不存在路径
     road_table = np.zeros([cross_nums,cross_nums],dtype = int) + ROADINVALID
@@ -18,10 +18,30 @@ def GenerateGraph(road_info,cross_info,max_speed,road_weight):  #初始化图
         end_id = int(road_info[i,5])-1
         channels = int(road_info[i,3])
         speed_limit = min(max_speed,float(road_info[i,2]))
-        graph[start_id,end_id] = float(road_info[i,1])/(speed_limit*0.8*channels)*(1+ratio/channels*road_weight[start_id,end_id])#路径长度/最高限速
+        graph[start_id,end_id] = float(road_info[i,1])/(speed_limit*0.8*channels)+ratio*road_weight[start_id,end_id]#路径长度/最高限速
         road_table[start_id,end_id] = int (road_info[i,0]) 
         if int(road_info[i,6]):
-            graph[end_id,start_id] = float(road_info[i,1])/(speed_limit*0.8*channels) ##单双向判断
+            graph[end_id,start_id] = float(road_info[i,1])/(speed_limit*0.8*channels)+ratio*road_weight[end_id,start_id] ##单双向判断
+            road_table[end_id,start_id] = int (road_info[i,0]) 
+    for j in range(cross_nums): #对角线置为0
+        graph[j,j] = 0
+    return graph,road_table
+
+def GenerateGraph2(road_info,cross_info,max_speed):  #初始化图
+    road_nums =  road_info.shape[0]
+    cross_nums = cross_info.shape[0]
+    MAXWEIGHT = 99999  #用来表示不存在路径
+    ROADINVALID = -1 #表示不存在路径
+    road_table = np.zeros([cross_nums,cross_nums],dtype = int) + ROADINVALID
+    graph = np.zeros([cross_nums,cross_nums],dtype = float) + MAXWEIGHT #初始化图
+    for i in range(road_nums):
+        start_id = int(road_info[i,4])-1  #cross编号从1开始
+        end_id = int(road_info[i,5])-1
+        speed_limit = min(max_speed,float(road_info[i,2]))
+        graph[start_id,end_id] = float(road_info[i,1])/speed_limit#路径长度/最高限速
+        road_table[start_id,end_id] = int (road_info[i,0]) 
+        if int(road_info[i,6]):
+            graph[end_id,start_id] = float(road_info[i,1])/speed_limit ##单双向判断
             road_table[end_id,start_id] = int (road_info[i,0]) 
     for j in range(cross_nums): #对角线置为0
         graph[j,j] = 0
@@ -104,17 +124,25 @@ def run_1(car_path,road_path,cross_path,answer_path):
     	car_info_group.append(car_info[cars_speed == s])
     count = 0
     for i in range(len(speeds)):
-        batch_num = 4
+        batch_num = 50
+        reset = 0
         batch_size = int(car_info_group[i].shape[0]/batch_num)
         for k in range(batch_num):
+            
             if k != batch_num-1:
                 car_batch = car_info_group[i][(k*batch_size):((k+1)*batch_size)]
-            else:
+            else: #取最后一批
                 car_batch = car_info_group[i][(k*batch_size):]
             if k == 0: #初始化
                 road_weight = np.zeros([cross_nums,cross_nums],dtype = float)
+                weight_save = road_weight
+                
             graph_init,road_table = GenerateGraph(road_info,cross_info,speeds[i],road_weight)
-            road_weight = np.zeros([cross_nums,cross_nums],dtype = float)
+            weight_save += road_weight
+            if reset == 5:
+                reset = 0
+                road_weight = np.zeros([cross_nums,cross_nums],dtype = float)
+            reset += 1
             graph, path =  Floyd(graph_init)   
             for j in range(car_batch.shape[0]):
                 count += 1
@@ -129,6 +157,8 @@ def run_1(car_path,road_path,cross_path,answer_path):
                     road_weight[road_start,road_end]+=1  #统计道路访问量
                 time_id = ceil(count/car_nums*N)-1
                 ans.append(GetAnswer(car_id,time[time_id],car_path,road_table))
+
+        
     np.savetxt(answer_path,ans,fmt='%s')
 
 if __name__ == "__main__":
