@@ -8,18 +8,21 @@ from floyd import Floyd
 def GenerateGraph(road_info,cross_info,max_speed,road_weight):  #初始化图
     road_nums =  road_info.shape[0]
     cross_nums = cross_info.shape[0]
+    cross_id = np.array(cross_info[:,0],dtype = int)
     ratio = 5 #道路满占用加权系数
     MAXWEIGHT = 99999  #用来表示不存在路径
     ROADINVALID = -1 #表示不存在路径
     road_table = np.zeros([cross_nums,cross_nums],dtype = int) + ROADINVALID
     graph = np.zeros([cross_nums,cross_nums],dtype = float) + MAXWEIGHT #初始化图
     for i in range(road_nums):
-        start_id = int(road_info[i,4])-1  #cross编号从1开始
-        end_id = int(road_info[i,5])-1
+        start_id = int(road_info[i,4])  #cross编号从1开始
+        start_id = np.where(cross_id == start_id)[0]
+        end_id = int(road_info[i,5])
+        end_id = np.where(cross_id == end_id)[0]
         channels = int(road_info[i,3])
         speed_limit = min(max_speed,float(road_info[i,2]))
         graph[start_id,end_id] = float(road_info[i,1])/(speed_limit*0.8*channels)+ratio*road_weight[start_id,end_id]#路径长度/最高限速
-        road_table[start_id,end_id] = int (road_info[i,0]) 
+        road_table[start_id,end_id] = int(road_info[i,0]) 
         if int(road_info[i,6]):
             graph[end_id,start_id] = float(road_info[i,1])/(speed_limit*0.8*channels)+ratio*road_weight[end_id,start_id] ##单双向判断
             road_table[end_id,start_id] = int (road_info[i,0]) 
@@ -74,7 +77,7 @@ def run(car_path,road_path,cross_path,answer_path):  #每辆车一张图
         end = int(car_info[i,2])-1
         max_speed = int(car_info[i,3])
         start_time = int(car_info[i,4])
-        graph_init,road_table = GenerateGraph(road_info,cross_info,max_speed)
+        graph_init,road_table = GenerateGraph2(road_info,cross_info,max_speed)
         graph, path =  Floyd(graph_init)
         car_path = path[start][end]
         #print('car {} path:{}'.format(car_id,car_path))
@@ -87,7 +90,8 @@ def run_0(car_path,road_path,cross_path,answer_path):
     ans = []
     car_nums = car_info.shape[0]
     cars_speed = np.array(car_info[:,3],dtype = int)
-    speeds = [8,6,4,2]
+
+    speeds = list(set(cars_speed))
     N =500
     time = np.linspace(10,700,N,dtype=int)
     car_info_group =[]
@@ -95,7 +99,7 @@ def run_0(car_path,road_path,cross_path,answer_path):
         car_info_group.append(car_info[cars_speed == s])
     count = 0
     for i in range(len(speeds)):
-        graph_init,road_table = GenerateGraph(road_info,cross_info,speeds[i])
+        graph_init,road_table = GenerateGraph2(road_info,cross_info,speeds[i])
         graph, path =  Floyd(graph_init)   
         for j in range(car_info_group[i].shape[0]):
             count += 1
@@ -115,8 +119,9 @@ def run_1(car_path,road_path,cross_path,answer_path):
     ans = []
     car_nums = car_info.shape[0]
     cross_nums = cross_info.shape[0]
+    cross_id = np.array(cross_info[:,0],dtype = int)
     cars_speed = np.array(car_info[:,3],dtype = int)
-    speeds = [8,6,4,2]
+    speeds = list(set(cars_speed))
     N =500
     time = np.linspace(10,700,N,dtype=int)
     car_info_group =[]
@@ -143,12 +148,15 @@ def run_1(car_path,road_path,cross_path,answer_path):
                 reset = 0
                 road_weight = np.zeros([cross_nums,cross_nums],dtype = float)
             reset += 1
+            a = 1
             graph, path =  Floyd(graph_init)   
             for j in range(car_batch.shape[0]):
                 count += 1
                 car_id = int(car_batch[j,0])
-                start = int(car_batch[j,1])-1
-                end = int(car_batch[j,2])-1
+                start = int(car_batch[j,1])
+                end = int(car_batch[j,2])
+                start = np.where(cross_id == start)[0][0]
+                end = np.where(cross_id == end)[0][0]
                 start_time = int(car_batch[j,4])
                 car_path = path[start][end]
                 for c_idx in range(len(car_path)-1):
@@ -160,11 +168,25 @@ def run_1(car_path,road_path,cross_path,answer_path):
 
         
     np.savetxt(answer_path,ans,fmt='%s')
+def find(car_path,road_path,cross_path,answer_path):
+    car_info,road_info,cross_info = LoadData(car_path,road_path,cross_path)
+    ans = []
+    car_nums = car_info.shape[0]
+    cars_speed = np.array(car_info[:,3],dtype = int)
+    speeds = list(set(cars_speed))
+    cars_time = np.array(car_info[:,4],dtype = int)
+    #speeds = [8,6,4,2]
+    #plt.hist(cars_speed,20)
+    plt.hist(cars_time,20)
+    plt.show()
+
 
 if __name__ == "__main__":
     car_path = '../config/car.txt'
     road_path = '../config/road.txt'
     cross_path = '../config/cross.txt'
     answer_path = '../config/answer.txt'
-    run_1(car_path,road_path,cross_path,answer_path)
+    # run_1(car_path,road_path,cross_path,answer_pathactivate)
+    find(car_path,road_path,cross_path,answer_path)
+
 

@@ -29,7 +29,7 @@ def main():
 # to read input file
 # process
 # to write output file
-    run_0(car_path,road_path,cross_path,answer_path)
+    run_1(car_path,road_path,cross_path,answer_path)
 
 
 if __name__ == "__main__":
